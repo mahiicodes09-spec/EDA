@@ -3,7 +3,11 @@ import pandas as pd
 import joblib
 
 # Loading the saved model
-bundle = joblib.load("heart_model_bundle.pkl")
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
+bundle = joblib.load(BASE_DIR / "heart_model_bundle.pkl")
 
 # Extracting the model from the bundle
 model = bundle["model"]
