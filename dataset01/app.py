@@ -102,103 +102,104 @@ with col6:
         "Fasting Blood Sugar",
         [0, 1]
     )
-    predict_button = st.button(
+
+predict_button = st.button(
     "Predict",
     type="primary",
     use_container_width=True
 )
 
-# Creating the input DataFrame
-input_data = pd.DataFrame({
-    "Age": [age],
-    "RestingBP": [resting_bp],
-    "Cholesterol": [cholesterol],
-    "FastingBS": [fasting_bs],
-    "MaxHR": [max_hr],
-    "Oldpeak": [oldpeak],
-    "Sex": [sex],
-    "ChestPainType": [chest_pain],
-    "RestingECG": [resting_ecg],
-    "ExerciseAngina": [exercise_angina],
-    "ST_Slope": [st_slope]
-})
-
-# Defining all possible categories
-categories = {
-    "Sex": ["F", "M"],
-    "ChestPainType": ["ASY", "ATA", "NAP", "TA"],
-    "RestingECG": ["LVH", "Normal", "ST"],
-    "ExerciseAngina": ["N", "Y"],
-    "ST_Slope": ["Down", "Flat", "Up"]
-}
-
-# Converting categorical columns
-for col, values in categories.items():
-    input_data[col] = pd.Categorical(
-        input_data[col],
-        categories=values
-    )
-
-# Encoding categorical columns
-input_encoded = pd.get_dummies(
-    input_data,
-    columns=list(categories.keys()),
-    drop_first=True,
-    dtype=int
-)
-
-# Matching training columns
-input_encoded = input_encoded.reindex(
-    columns=feature_columns,
-    fill_value=0
-)
-
-# Scaling numerical columns
-num_cols = [
-    "Age",
-    "RestingBP",
-    "Cholesterol",
-    "MaxHR",
-    "Oldpeak"
-]
-
-input_encoded[num_cols] = scaler.transform(
-    input_encoded[num_cols]
-)
-
-# Prediction
+# Prediction and display
 if predict_button:
-  st.write("Button clicked successfully!")
-  prediction = model.predict(input_encoded)
-  probability = model.predict_proba(input_encoded)
+    # Creating the input DataFrame
+    input_data = pd.DataFrame({
+        "Age": [age],
+        "RestingBP": [resting_bp],
+        "Cholesterol": [cholesterol],
+        "FastingBS": [fasting_bs],
+        "MaxHR": [max_hr],
+        "Oldpeak": [oldpeak],
+        "Sex": [sex],
+        "ChestPainType": [chest_pain],
+        "RestingECG": [resting_ecg],
+        "ExerciseAngina": [exercise_angina],
+        "ST_Slope": [st_slope]
+    })
 
-  no_disease = probability[0][0] * 100
-  disease = probability[0][1] * 100
+    # Defining all possible categories
+    categories = {
+        "Sex": ["F", "M"],
+        "ChestPainType": ["ASY", "ATA", "NAP", "TA"],
+        "RestingECG": ["LVH", "Normal", "ST"],
+        "ExerciseAngina": ["N", "Y"],
+        "ST_Slope": ["Down", "Flat", "Up"]
+    }
 
-# Displaying results
-  st.divider()
-  st.subheader("Prediction Results")
+    # Converting categorical columns
+    for col, values in categories.items():
+        input_data[col] = pd.Categorical(
+            input_data[col],
+            categories=values
+        )
 
-  if prediction[0] == 1:
-    st.warning("Model prediction: Heart disease")
-  else:
-    st.success("Model prediction: No heart disease")
-
-  col1, col2 = st.columns(2)
-
-  with col1:
-    st.metric(
-        "No heart disease",
-        f"{no_disease:.2f}%"
+    # Encoding categorical columns
+    input_encoded = pd.get_dummies(
+        input_data,
+        columns=list(categories.keys()),
+        drop_first=True,
+        dtype=int
     )
 
-  with col2:
-    st.metric(
-        "Heart disease",
-        f"{disease:.2f}%"
+    # Matching training columns
+    input_encoded = input_encoded.reindex(
+        columns=feature_columns,
+        fill_value=0
     )
 
-  st.caption(
-    "These are model-estimated probabilities, not medically "
-    "validated diagnostic probabilities. This educational "
-    "model should not be used for medical decisions.")
+    # Scaling numerical columns
+    num_cols = [
+        "Age",
+        "RestingBP",
+        "Cholesterol",
+        "MaxHR",
+        "Oldpeak"
+    ]
+
+    input_encoded[num_cols] = scaler.transform(
+        input_encoded[num_cols]
+    )
+
+    prediction = model.predict(input_encoded)
+    probability = model.predict_proba(input_encoded)
+
+    no_disease = probability[0][0] * 100
+    disease = probability[0][1] * 100
+
+    # Displaying results
+    st.divider()
+    st.subheader("Prediction Results")
+
+    if prediction[0] == 1:
+        st.warning("Model prediction: Heart disease")
+    else:
+        st.success("Model prediction: No heart disease")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "No heart disease",
+            f"{no_disease:.2f}%"
+        )
+
+    with col2:
+        st.metric(
+            "Heart disease",
+            f"{disease:.2f}%"
+        )
+
+    st.caption(
+        "These are model-estimated probabilities, not medically "
+        "validated diagnostic probabilities. This educational "
+        "model should not be used for medical decisions."
+    )
