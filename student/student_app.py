@@ -1,9 +1,13 @@
 import streamlit as st
 import pandas as pd
+
+from pathlib import Path
 import joblib
 
-# Load trained model
-model = joblib.load("student_gpa_model.pkl")
+BASE_DIR = Path(__file__).resolve().parent
+model = joblib.load(BASE_DIR / "student_gpa_model.pkl")
+
+
 
 st.title("Student GPA Predictor")
 st.write("Predict GPA based on daily student activities.")
